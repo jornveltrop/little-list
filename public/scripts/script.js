@@ -1,27 +1,40 @@
 let socket = io()
-let itemList = document.querySelector('form fieldset')
+let itemList = document.querySelector('form fieldset section')
 let textInput = document.querySelector('input[type="text"]')
+
+let room = window.location.href.substring(window.location.href.lastIndexOf("/") + 1)
+// on connection, tries to login to the chat with the chat ID made
+socket.on('connect', function(){
+  console.log('JAA')
+  socket.emit('listRoom', room);
+});
 
 document.querySelector('form').addEventListener('submit', event => {
   event.preventDefault()
   if (textInput.value) {
-    socket.emit('item', textInput.value)
+    socket.emit('item', {value: textInput.value, room: room})
     textInput.value = ''
   }
 })
 
 socket.on('item', item => {
+  console.log(woop)
   let html = document.createElement('li')
-  html.appendChild(Object.assign(document.createElement('input'), { 
-    id: item,
-    type: "checkbox"
-  }))
-  html.appendChild(Object.assign(document.createElement('label'), { 
-    textContent: item,
-    htmlFor: item
-  }))
 
-  itemList.appendChild(html)
+  let input = document.createElement('input')
+      input.id = item;
+      input.type = "checkbox";
+      
+
+  let label = document.createElement('label')
+      label.textContent = item;
+      label.htmlFor = item;
+      label.setAttribute("data-content", item);
+
+  html.appendChild(Object.assign(input))
+  html.appendChild(Object.assign(label))
+
+  itemList.insertAdjacentElement('beforebegin', html)
 
   itemList.scrollTop = itemList.scrollHeight
 
@@ -53,16 +66,3 @@ socket.on("unchecked", item => {
     changedItem.checked = false;
   }
 })
-
-textInput.addEventListener("keypress", function() {
-  setTimeout(function() { socket.emit("doneTyping") }, 3000)
-  socket.emit("typing")
-})
-
-socket.on("typing", () =>
-  document.querySelector("#typing").textContent = "Someone is typing..."
-)
-
-socket.on("doneTyping", () =>
-  document.querySelector("#typing").textContent = ""
-)
