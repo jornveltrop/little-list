@@ -66,7 +66,7 @@ app.get("/list", isLoggedIn, (req, res) => {
   res.render("list", {user: req.user})
 })
 
-app.get('/list/:id', (req,res) => {
+app.get('/list/:id', isLoggedIn, (req,res) => {
   res.render("list", {user: req.user})
 
   io.on('connection', (socket) => {
