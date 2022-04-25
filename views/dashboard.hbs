@@ -1,23 +1,14 @@
 <main>
     <h2> Dit zijn jouw lijstjes, {{user.given_name}}:</h2>
     <ul class="listView">
-        <a href="/1">
-            <li>
-                <h3>Lijstje 1</h3>
-            </li>
-        </a>
-        
-        <a href="/4">
-            <li>
-                <h3>Lijstje 2</h3>
-            </li>
-        </a>
 
-        <a href="/3">
-            <li>
-                <h3>Lijstje 3</h3>
-            </li>
-        </a>
+        {{#each lists}}
+            <a href="/{{this}}">
+                <li>
+                    <h3>{{this}}</h3>
+                </li>
+            </a>
+        {{/each}}
 
         <form class="makeList" action="/" method="post">
             <button type="submit">Nieuw lijstje +</button>

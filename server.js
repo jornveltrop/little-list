@@ -60,6 +60,22 @@ io.on('connection', (socket) => {
 
   socket.on('item', (item) => {
     console.log(item)
+
+    // let insert = { url: 'someValue', naam: 'otherValue', list_items: 'otherValue' }
+    //   addItem(insert)
+    url = item.room
+
+    getItems(url).then(data => {
+      let items = data.body[0].list_items
+      console.log(items)
+    })
+
+    async function updateItem (insert) {
+      const { data, error } = await supabase
+      .from('lists')
+      .insert([ insert,])
+    }
+
     io.to(item.room).emit('item', item.value)
   })
 
@@ -80,12 +96,33 @@ io.on('connection', (socket) => {
 
 //ROUTES
 app.get("/", isLoggedIn, (req, res) => {
-  let mail = req.user.email
-  console.log(req.user)
-  addUserDB(mail)
+  let user = req.user.email
+  let photoURL = req.user.photos[0].value
+  
+  addUserDB(user)
 
-  photoURL = req.user.photos[0].value
-  res.render("dashboard", {user: req.user, photo: photoURL})
+  getUrlArray(user).then(data => {
+    let lists = data.body[0].lists
+    console.log(lists)
+    res.render("dashboard", {user: req.user, photo: photoURL, lists})
+  })
+})
+
+app.post("/", (req, res) => {
+  let url = randomUrl()
+  console.log(req.user.email)
+  let user = req.user.email
+
+  getUrlArray(user).then(data => {
+    let lists = data.body[0].lists
+    lists.push(url)
+
+    return lists
+  }).then ( lists => {
+    addUrlToUser(user, lists)
+  })  
+
+  res.redirect(`/${url}`)
 })
 
 app.get("/logout", (req, res) => {
@@ -95,32 +132,24 @@ app.get("/logout", (req, res) => {
 })
 
 app.get('/:id', isLoggedIn, (req,res) => {
-  res.render("list", {user: req.user})
-});
+  let url = req.params.id
+  let photoURL = req.user.photos[0].value
 
-app.post("/", (req, res) => {
-  let url = randomUrl()
-  console.log(req.user.email)
-  let user = req.user.email
+  let insert = { "url": url, "email": req.user.email }
+  addList(insert)
 
-  let pushedUrlList = getUrlArray(user).then(data => {
-    let lists = data.body[0].lists
-    lists.push(url)
-
-    return lists
-  }).then ( lists => {
-    addUrlToUser(user, lists)
+  getItems(url).then(data => {
+    let items = data.body[0].list_items
+    console.log(items)
+    // items.forEach(item => {
+    //   console.log(item.naam)
+    // });
+    res.render("list", {user: req.user, photo: photoURL, url, items})
   })
 
-  async function addUrlToUser(user, data) {
-    let addUrlToUser = await supabase
-    .from('profiles')
-    .update({ "lists": data })
-    .eq('email', user)
-  }  
+});
 
-  res.redirect(`/${url}`)
-})
+
 
 
 app.get("/auth/google", 
@@ -149,10 +178,8 @@ http.listen(port, () => {
 
 
 
-let insert = { url: 'someValue', naam: 'otherValue', list_items: 'otherValue' }
-  addItem(insert)
 
-async function addItem (insert) {
+async function addList (insert) {
   const { data, error } = await supabase
   .from('lists')
   .insert([ insert,])
@@ -177,6 +204,22 @@ async function getUrlArray(user) {
   .from('profiles')
   .select("lists")
   .eq('email', user)
+
+  return array
+}
+
+async function addUrlToUser(user, data) {
+  let addUrlToUser = await supabase
+  .from('profiles')
+  .update({ "lists": data })
+  .eq('email', user)
+}
+
+async function getItems(url) {
+  let array = await supabase
+  .from('lists')
+  .select("list_items")
+  .eq('url', url)
 
   return array
 }

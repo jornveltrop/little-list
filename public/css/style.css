@@ -79,6 +79,10 @@ header {
   justify-content: space-between
 }
 
+header a {
+  text-decoration: none;
+}
+
 header img {
   border-radius: 100%;
   height: 2.5em;
