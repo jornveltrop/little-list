@@ -15,14 +15,22 @@ const http = require('http').createServer(app)
 const session = require('express-session')
 const io = require('socket.io')(http)
 const passport = require('passport');
+const { createClient } = require('@supabase/supabase-js')
 require('dotenv').config()
 const port = process.env.PORT || 8000
 const secret = process.env.SECRET
 require('./auth')
 
 function isLoggedIn(req, res, next) {
-  req.user ? next() : res.render("unauthorized");
+  req.user ? next() : res.render("login", { layout: "mainNotLogged"});
 }
+
+//API 
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+
 
 // Render static files.
 app.use(express.static("public"))
@@ -41,10 +49,79 @@ app.use(express.urlencoded({ extended: true }))
 app.use(passport.initialize());
 app.use(passport.session());
 
-//ROUTES
-app.get("/", (req, res) => {
-    res.render("index")
+
+//SOCKET
+io.on('connection', (socket) => {
+  console.log('a user connected')
+
+  socket.on('joinRoom', (room) => {
+    socket.join(room);
+  });
+
+  socket.on('item', (item) => {
+    console.log(item)
+    io.to(item.room).emit('item', item.value)
+  })
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected')
+  })
+
+  socket.on("checked", (item) => {
+    console.log(item + " is checked (server-side).")
+    io.emit("checked", item)
+  })
+
+  socket.on("unchecked", (item) => {
+    console.log(item + " is unchecked (server-side).")
+    io.emit("unchecked", item)
+  })
 })
+
+//ROUTES
+app.get("/", isLoggedIn, (req, res) => {
+  let mail = req.user.email
+  console.log(req.user)
+  addUserDB(mail)
+
+  photoURL = req.user.photos[0].value
+  res.render("dashboard", {user: req.user, photo: photoURL})
+})
+
+app.get("/logout", (req, res) => {
+  req.logout();
+  req.session.destroy();
+  res.redirect('/')
+})
+
+app.get('/:id', isLoggedIn, (req,res) => {
+  res.render("list", {user: req.user})
+});
+
+app.post("/", (req, res) => {
+  let url = randomUrl()
+  console.log(req.user.email)
+  let user = req.user.email
+
+  let pushedUrlList = getUrlArray(user).then(data => {
+    let lists = data.body[0].lists
+    lists.push(url)
+
+    return lists
+  }).then ( lists => {
+    addUrlToUser(user, lists)
+  })
+
+  async function addUrlToUser(user, data) {
+    let addUrlToUser = await supabase
+    .from('profiles')
+    .update({ "lists": data })
+    .eq('email', user)
+  }  
+
+  res.redirect(`/${url}`)
+})
+
 
 app.get("/auth/google", 
   passport.authenticate('google', { scope: ['email', 'profile']})
@@ -52,7 +129,7 @@ app.get("/auth/google",
 
 app.get("/google/callback", 
   passport.authenticate('google', {
-    successRedirect: '/list',
+    successRedirect: '/',
     failureRedirect: '/auth/failure',
   })
 )
@@ -61,57 +138,45 @@ app.get("/auth/failure", (req, res) => {
   res.send('Something went wrong')
 })
 
-app.get("/list", isLoggedIn, (req, res) => {
+app.get("/securedVB", isLoggedIn, (req, res) => {
   console.log(req.user)
-  res.render("list", {user: req.user})
+  res.render("dashboard", {user: req.user})
 })
-
-app.get('/list/:id', isLoggedIn, (req,res) => {
-  res.render("list", {user: req.user})
-
-  io.on('connection', (socket) => {
-    console.log('a user connected')
-
-    //
-    socket.on('listRoom', data => {
-      socket.room = data.room;
-      console.log(socket.room)
-      socket.join(data.room);
-    });
-
-    socket.on('item', (item) => {
-      console.log(item)
-      io.sockets.in(item.room).emit('item', {item: item.value})
-    })
-  
-    socket.on('disconnect', () => {
-      console.log('user disconnected')
-    })
-  
-    socket.on("checked", (item) => {
-      console.log(item + " is checked (server-side).")
-      io.emit("checked", item)
-    })
-  
-    socket.on("unchecked", (item) => {
-      console.log(item + " is unchecked (server-side).")
-      io.emit("unchecked", item)
-    })
-
-  })
-
-  console.log(io.sockets.adapter.rooms)
-
-});
-
-app.get("/logout", (req, res) => {
-  req.logout();
-  req.session.destroy();
-  res.redirect('/')
-})
-
-
 
 http.listen(port, () => {
   console.log('listening on port ', port)
 })
+
+
+
+let insert = { url: 'someValue', naam: 'otherValue', list_items: 'otherValue' }
+  addItem(insert)
+
+async function addItem (insert) {
+  const { data, error } = await supabase
+  .from('lists')
+  .insert([ insert,])
+}
+
+function randomUrl() {
+  let urlHash = Math.random().toString(36).substring(7);
+  return urlHash
+}
+
+async function addUserDB (user) {
+  console.log(user)
+  const { data, error } = await supabase
+  .from('profiles')
+  .insert([
+    { email:  user},
+  ])
+}
+
+async function getUrlArray(user) {
+  let array = await supabase
+  .from('profiles')
+  .select("lists")
+  .eq('email', user)
+
+  return array
+}

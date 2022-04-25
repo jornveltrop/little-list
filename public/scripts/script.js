@@ -4,21 +4,26 @@ let textInput = document.querySelector('input[type="text"]')
 
 let room = window.location.href.substring(window.location.href.lastIndexOf("/") + 1)
 // on connection, tries to login to the chat with the chat ID made
-socket.on('connect', function(){
-  console.log('JAA')
-  socket.emit('listRoom', room);
+
+socket.emit('joinRoom', room);
+
+if (document.querySelector('.addItemForm')) {
+  document.querySelector('.addItemForm').addEventListener('submit', event => {
+    event.preventDefault()
+    if (textInput.value) {
+      socket.emit('item', {value: textInput.value, room: room})
+      textInput.value = ''
+    }
+  })
+} 
+
+//client side code:
+socket.on('roomSize', (roomSize) => {
+  console.log(roomSize)
 });
 
-document.querySelector('form').addEventListener('submit', event => {
-  event.preventDefault()
-  if (textInput.value) {
-    socket.emit('item', {value: textInput.value, room: room})
-    textInput.value = ''
-  }
-})
-
 socket.on('item', item => {
-  console.log(woop)
+  console.log(item)
   let html = document.createElement('li')
 
   let input = document.createElement('input')
