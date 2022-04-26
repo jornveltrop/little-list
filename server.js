@@ -61,22 +61,26 @@ io.on('connection', (socket) => {
   socket.on('item', (item) => {
     console.log(item)
 
+    io.to(item.room).emit('item', item.value)
     // let insert = { url: 'someValue', naam: 'otherValue', list_items: 'otherValue' }
     //   addItem(insert)
-    url = item.room
+    let url = item.room
 
     getItems(url).then(data => {
-      let items = data.body[0].list_items
-      console.log(items)
+      let items = data.body[0].list_items || []
+
+      let newItem = {
+        "naam": item.value,
+        "checked": false
+      }
+
+      items.push(newItem)
+      return items
+    })
+    .then(items => {
+      updateItem(url, items)
     })
 
-    async function updateItem (insert) {
-      const { data, error } = await supabase
-      .from('lists')
-      .insert([ insert,])
-    }
-
-    io.to(item.room).emit('item', item.value)
   })
 
   socket.on('disconnect', () => {
@@ -84,14 +88,44 @@ io.on('connection', (socket) => {
   })
 
   socket.on("checked", (item) => {
-    console.log(item + " is checked (server-side).")
-    io.emit("checked", item)
+    console.log(item.value + " is checked (server-side).")
+    io.to(item.room).emit("checked", item.value)
+
+    let url = item.room
+    getItems(url).then(data => {
+      let items = data.body[0].list_items
+      let filteredItem = filterItem(items, item) 
+      
+      //Change checked state to true
+      filteredItem.checked = true
+      
+      return items
+    }).then(items => {
+      console.log(items)
+      updateItem(url, items)
+    })
   })
 
   socket.on("unchecked", (item) => {
-    console.log(item + " is unchecked (server-side).")
-    io.emit("unchecked", item)
+    console.log(item.value + " is unchecked (server-side).")
+    io.to(item.room).emit("unchecked", item.value)
+
+    let url = item.room
+    getItems(url).then(data => {
+      let items = data.body[0].list_items
+      let filteredItem = filterItem(items, item) 
+      
+      //Change checked state to true
+      filteredItem.checked = false
+
+      return items
+    }).then(items => {
+      console.log(items)
+      updateItem(url, items)
+    })
   })
+
+
 })
 
 //ROUTES
@@ -139,11 +173,12 @@ app.get('/:id', isLoggedIn, (req,res) => {
   addList(insert)
 
   getItems(url).then(data => {
-    let items = data.body[0].list_items
-    console.log(items)
-    // items.forEach(item => {
-    //   console.log(item.naam)
-    // });
+    let items
+    if (data.body[0] != undefined) {
+      items = data.body[0].list_items
+    } else {
+      items = []
+    }
     res.render("list", {user: req.user, photo: photoURL, url, items})
   })
 
@@ -222,4 +257,19 @@ async function getItems(url) {
   .eq('url', url)
 
   return array
+}
+
+async function updateItem (url, insert) {
+  const { data, error } = await supabase
+  .from('lists')
+  .update({ list_items: insert })
+  .eq('url', url)
+}
+
+function filterItem(list, item){
+  let selectedItem = list.find(listItem => {
+    return listItem.naam === item.value
+  })
+
+  return selectedItem
 }

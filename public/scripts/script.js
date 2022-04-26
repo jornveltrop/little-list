@@ -17,6 +17,23 @@ if (document.querySelector('.addItemForm')) {
   })
 } 
 
+// Add event listener.
+function setEventListeners() {
+  let inputs = document.querySelectorAll('input[type="checkbox"]')
+  inputs.forEach(input => {
+    input.addEventListener("change", _event => {
+      item = {value: input.id, room: room}
+      if (input.checked) {
+        socket.emit("checked", item)
+      } else {
+        socket.emit("unchecked", item)
+      }
+    })
+  })
+}
+
+setEventListeners();
+
 //client side code:
 socket.on('roomSize', (roomSize) => {
   console.log(roomSize)
@@ -47,9 +64,9 @@ socket.on('item', item => {
   let createdItem = document.querySelector(`#${item}`)
   createdItem.addEventListener("change", _event => {
     if (createdItem.checked) {
-      socket.emit("checked", createdItem.id)
+      socket.emit("checked", {value: createdItem.id, room: room})
     } else {
-      socket.emit("unchecked", createdItem.id)
+      socket.emit("unchecked", {value: createdItem.id, room: room})
     }
   })
 })

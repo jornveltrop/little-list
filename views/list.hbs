@@ -5,7 +5,7 @@
             {{!-- hier komen list items --}}
             {{#each items}}
                 <li>
-                    <input id="{{naam}}" type="checkbox">
+                    <input id="{{naam}}" type="checkbox" {{#ifCond checked true}} checked {{/ifCond}}>
                     <label for="{{naam}}" data-content="{{naam}}">{{naam}}</label>
                 </li>
             {{/each}}
