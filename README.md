@@ -8,7 +8,7 @@
   - [License](#license)
 
 ## Live demo
-https://little-list-rtw.herokuapp.com/
+
 
 ## Installation
 Clone deze repository naar jouw lokale folder:
