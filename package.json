@@ -16,7 +16,7 @@
     "socket.io"
   ],
   "author": "Jorn Veltrop",
-  "license": "GPL-3.0",
+  "license": "https://github.com/jornveltrop/little-list/blob/main/LICENSE",
   "bugs": {
     "url": "https://github.com/jornveltrop/little-list/issues"
   },
