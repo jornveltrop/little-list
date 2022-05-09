@@ -3,11 +3,11 @@
     <ul class="listView">
 
         {{#each lists}}
-            <a href="/{{this}}">
-                <li>
+            <li>
+                <a href="/{{this}}">
                     <h3>{{this}}</h3>
-                </li>
-            </a>
+                </a>
+            </li>
         {{/each}}
 
         <form class="makeList" action="/" method="post">

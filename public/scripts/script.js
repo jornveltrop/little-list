@@ -3,7 +3,6 @@ let itemList = document.querySelector('form fieldset section')
 let textInput = document.querySelector('input[type="text"]')
 
 let room = window.location.href.substring(window.location.href.lastIndexOf("/") + 1)
-// on connection, tries to login to the chat with the chat ID made
 
 socket.emit('joinRoom', room);
 

@@ -8,6 +8,9 @@ https://stackoverflow.com/questions/71037062/create-a-sharable-url-for-a-room-no
 https://gist.github.com/crtr0/2896891
 */
 
+require('dotenv').config()
+require('./auth')
+
 const express = require('express')
 const app = express()
 const handlebars  = require('express-handlebars')
@@ -16,10 +19,9 @@ const session = require('express-session')
 const io = require('socket.io')(http)
 const passport = require('passport');
 const { createClient } = require('@supabase/supabase-js')
-require('dotenv').config()
 const port = process.env.PORT || 8000
 const secret = process.env.SECRET
-require('./auth')
+
 
 function isLoggedIn(req, res, next) {
   req.user ? next() : res.render("login", { layout: "mainNotLogged"});
@@ -29,8 +31,6 @@ function isLoggedIn(req, res, next) {
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
-
-
 
 // Render static files.
 app.use(express.static("public"))
@@ -59,11 +59,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('item', (item) => {
-    console.log(item)
 
     io.to(item.room).emit('item', item.value)
-    // let insert = { url: 'someValue', naam: 'otherValue', list_items: 'otherValue' }
-    //   addItem(insert)
     let url = item.room
 
     getItems(url).then(data => {
@@ -120,7 +117,6 @@ io.on('connection', (socket) => {
 
       return items
     }).then(items => {
-      console.log(items)
       updateItem(url, items)
     })
   })
@@ -130,30 +126,31 @@ io.on('connection', (socket) => {
 
 //ROUTES
 app.get("/", isLoggedIn, (req, res) => {
-  let user = req.user.email
+  let userMail = req.user.email
   let photoURL = req.user.photos[0].value
-  
-  addUserDB(user)
 
-  getUrlArray(user).then(data => {
+  addUserDB(userMail)
+
+  getUrlArray(userMail).then(data => {
+
     let lists = data.body[0].lists
-    console.log(lists)
+
     res.render("dashboard", {user: req.user, photo: photoURL, lists})
   })
 })
 
 app.post("/", (req, res) => {
   let url = randomUrl()
-  console.log(req.user.email)
-  let user = req.user.email
 
-  getUrlArray(user).then(data => {
+  let userMail = req.user.email
+
+  getUrlArray(userMail).then(data => {
     let lists = data.body[0].lists
     lists.push(url)
 
     return lists
   }).then ( lists => {
-    addUrlToUser(user, lists)
+    addUrlToUser(userMail, lists)
   })  
 
   res.redirect(`/${url}`)
@@ -202,11 +199,6 @@ app.get("/auth/failure", (req, res) => {
   res.send('Something went wrong')
 })
 
-app.get("/securedVB", isLoggedIn, (req, res) => {
-  console.log(req.user)
-  res.render("dashboard", {user: req.user})
-})
-
 http.listen(port, () => {
   console.log('listening on port ', port)
 })
@@ -216,8 +208,8 @@ http.listen(port, () => {
 
 async function addList (insert) {
   const { data, error } = await supabase
-  .from('lists')
-  .insert([ insert,])
+    .from('lists')
+    .insert([ insert,])
 }
 
 function randomUrl() {
@@ -225,45 +217,44 @@ function randomUrl() {
   return urlHash
 }
 
-async function addUserDB (user) {
-  console.log(user)
+async function addUserDB (userMail) {
   const { data, error } = await supabase
-  .from('profiles')
-  .insert([
-    { email:  user},
-  ])
+    .from('profiles')
+    .insert([
+      { email:  userMail},
+    ])
 }
 
-async function getUrlArray(user) {
+async function getUrlArray(userMail) {
   let array = await supabase
-  .from('profiles')
-  .select("lists")
-  .eq('email', user)
+    .from('profiles')
+    .select("lists")
+    .eq('email', userMail)
 
   return array
 }
 
-async function addUrlToUser(user, data) {
+async function addUrlToUser(userMail, data) {
   let addUrlToUser = await supabase
-  .from('profiles')
-  .update({ "lists": data })
-  .eq('email', user)
+    .from('profiles')
+    .update({ "lists": data })
+    .eq('email', userMail)
 }
 
 async function getItems(url) {
   let array = await supabase
-  .from('lists')
-  .select("list_items")
-  .eq('url', url)
+    .from('lists')
+    .select("list_items")
+    .eq('url', url)
 
   return array
 }
 
 async function updateItem (url, insert) {
   const { data, error } = await supabase
-  .from('lists')
-  .update({ list_items: insert })
-  .eq('url', url)
+    .from('lists')
+    .update({ list_items: insert })
+    .eq('url', url)
 }
 
 function filterItem(list, item){

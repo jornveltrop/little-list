@@ -1,7 +1,7 @@
 {
-  "name": "barebonechat",
+  "name": "Little List",
   "version": "1.0.0",
-  "description": "It's a barebone chat app used as an example in a course on realtime web apps.",
+  "description": "Little List is een real-time checklist app",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ju5tu5/barebonechat.git"
+    "url": "git+https://github.com/jornveltrop/little-list.git"
   },
   "keywords": [
     "express",
@@ -18,9 +18,9 @@
   "author": "Justus Sturkenboom <justus@ju5tu5.nl>",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/ju5tu5/barebonechat/issues"
+    "url": "https://github.com/jornveltrop/little-list/issues"
   },
-  "homepage": "https://github.com/ju5tu5/barebonechat#readme",
+  "homepage": "https://github.com/jornveltrop/little-list/blob/main/README.md",
   "dependencies": {
     "@supabase/supabase-js": "^1.35.2",
     "dotenv": "^16.0.0",

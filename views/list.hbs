@@ -2,13 +2,13 @@
     <h2> Lijst '{{url}}'</h2>
     <form class="addItemForm">
         <fieldset>
-            {{!-- hier komen list items --}}
             {{#each items}}
                 <li>
                     <input id="{{naam}}" type="checkbox" {{#ifCond checked true}} checked {{/ifCond}}>
                     <label for="{{naam}}" data-content="{{naam}}">{{naam}}</label>
                 </li>
             {{/each}}
+            
             <section>
                 <label for="addItem">+</label>
                 <input id="addItem" type="text" autocomplete="off" placeholder="Add item">
