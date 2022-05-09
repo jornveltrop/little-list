@@ -1,5 +1,5 @@
 {
-  "name": "Little List",
+  "name": "Little-List",
   "version": "1.0.0",
   "description": "Little List is een real-time checklist app",
   "main": "server.js",
@@ -15,7 +15,7 @@
     "express",
     "socket.io"
   ],
-  "author": "Justus Sturkenboom <justus@ju5tu5.nl>",
+  "author": "Jorn Veltrop",
   "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/jornveltrop/little-list/issues"

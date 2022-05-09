@@ -118,6 +118,9 @@ header img {
 .listView form {
   background: transparent;
   border: 2px solid var(--darkerGrey);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 button {
