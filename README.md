@@ -26,7 +26,7 @@ git clone https://github.com/jornveltrop/little-list.git
 | ----------------------------------------------------------------- | --- |
 | 📋  Handige checklist                                             | ✔   |
 | ⏱️  Real-time functionaliteit                                     | ✔   |
-| 🔒  Gekoppeld aan je google account                               | ✔   |
+| 🔒  Gekoppeld aan je Google account                               | ✔   |
 | 💾  Data wordt opgeslagen in de database                          | ✔   |
 
 
