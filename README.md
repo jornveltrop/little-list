@@ -6,7 +6,7 @@
   - [Installatie](#Installatie)
   - [Functies](#Functies)
   - [Sockets](#Sockets)
-  - [Supabase API (database)](#Supabase-API-(database))
+  - [Supabase API (database)](#supabase-api-database)
   - [Data flow diagram](#Data-flow-diagram)
   - [To-do](#To-do)
   - [Bronnen](#Bronnen)
