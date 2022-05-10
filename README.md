@@ -42,20 +42,25 @@ Ik heb voor deze applicatie gebruik gemaakt van de [socket.io](https://socket.io
 Om de gegevens van de mensen op te slaan maak ik gebruik van [Supabase](https://supabase.com/). Supabase is een open source database en API systeem. Hierin heb ik een eigen database model opgezet. Deze database vul ik via de server met API calls. 
 
 Dit is het data model wat gebruikt wordt in de database voor Little List:
-<a href="docs/data-modellen.png">
+<a href="docs/data-modellen.png"  target="_blank">
 	<img src="docs/data-modellen.png" width="60%" alt="Een visueel overzicht van het data model voor de database in Supabase">
 </a>
 
+<a href="docs/data-modellen.png" target="_blank">Vergroot foto</a>
+
+
 ## Data flow diagram
 Om inzicht te krijgen in welke events en data er wordt verstuurd tussen de verschillende componenten is hier een visueel overzicht van de data flow:
-<a href="docs/data-flow_diagram.png">
+<a href="docs/data-flow_diagram.png" target="_blank">
 	<img src="docs/data-flow_diagram.png" width="100%" alt="Een visueel overzicht van de data flow diagram voor Little List">
 </a>
+
+<a href="docs/data-flow_diagram.png" target="_blank">Vergroot foto</a>
 
 ## To-do
 Check voor de to-do's de [GitHub repository issue's pagina](https://github.com/jornveltrop/little-list/issues):
 
-<a href="https://github.com/jornveltrop/little-list/issues">
+<a href="https://github.com/jornveltrop/little-list/issues" target="_blank">
 	<img src="docs/to-do.png" width="40%" alt="Een screenshot van de aangemaakte issue's">
 </a>
 
