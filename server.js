@@ -1,13 +1,3 @@
-/*
-https://socket.io/get-started/chat
-Auth
-https://www.youtube.com/watch?v=Q0a0594tOrc
-
-ROOMS
-https://stackoverflow.com/questions/71037062/create-a-sharable-url-for-a-room-nodejs-socketio
-https://gist.github.com/crtr0/2896891
-*/
-
 require('dotenv').config()
 require('./auth')
 
@@ -22,12 +12,12 @@ const { createClient } = require('@supabase/supabase-js')
 const port = process.env.PORT || 8000
 const secret = process.env.SECRET
 
-
+// Check if user is logged in
 function isLoggedIn(req, res, next) {
   req.user ? next() : res.render("login", { layout: "mainNotLogged"});
 }
 
-//API 
+// API 
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
@@ -39,6 +29,7 @@ app.use(express.static("public"))
 app.engine("hbs", handlebars.engine({ helpers: require("./helpers"), extname: ".hbs" }))
 app.set("view engine", "hbs")
 
+// Set-up session
 app.use(session({ 
     secret: secret
 }))
@@ -46,11 +37,12 @@ app.use(session({
 // Parse incoming requests.
 app.use(express.urlencoded({ extended: true }))
 
+// Set-up passport
 app.use(passport.initialize());
 app.use(passport.session());
 
 
-//SOCKET
+// SOCKET
 io.on('connection', (socket) => {
   console.log('a user connected')
 
@@ -60,21 +52,26 @@ io.on('connection', (socket) => {
 
   socket.on('item', (item) => {
 
+    // Send item to all clients in specific room
     io.to(item.room).emit('item', item.value)
     let url = item.room
 
+    // Get current room items from database
     getItems(url).then(data => {
       let items = data.body[0].list_items || []
 
+      // Make new item
       let newItem = {
         "naam": item.value,
         "checked": false
       }
 
+      // Push new item to current list items
       items.push(newItem)
       return items
     })
     .then(items => {
+      // Send updated list to database
       updateItem(url, items)
     })
   })
@@ -85,37 +82,48 @@ io.on('connection', (socket) => {
 
   socket.on("checked", (item) => {
     console.log(item.value + " is checked (server-side).")
+
+    // Send checked value to all clients in specific room
     io.to(item.room).emit("checked", item.value)
 
+    // Get current room items from database
     let url = item.room
     getItems(url).then(data => {
       let items = data.body[0].list_items
+
+      // Get specific changed item from database data
       let filteredItem = filterItem(items, item) 
       
-      //Change checked state to true
+      // Change checked state to true
       filteredItem.checked = true
       
       return items
     }).then(items => {
-      console.log(items)
+      // Send changed list back to database
       updateItem(url, items)
     })
   })
 
   socket.on("unchecked", (item) => {
     console.log(item.value + " is unchecked (server-side).")
+
+    // Send unchecked value to all clients in specific room
     io.to(item.room).emit("unchecked", item.value)
 
+    // Get current room items from database
     let url = item.room
     getItems(url).then(data => {
       let items = data.body[0].list_items
+
+      // Get specific changed item from database data
       let filteredItem = filterItem(items, item) 
       
-      //Change checked state to true
+      // Change checked state to false
       filteredItem.checked = false
 
       return items
     }).then(items => {
+      // Send changed list back to database
       updateItem(url, items)
     })
   })
@@ -123,13 +131,14 @@ io.on('connection', (socket) => {
 
 })
 
-//ROUTES
+// ROUTES
 app.get("/", isLoggedIn, (req, res) => {
   let userMail = req.user.email
   let photoURL = req.user.photos[0].value
 
   addUserDB(userMail)
 
+  // Get all lists from logged in user
   getUrlArray(userMail).then(data => {
 
     let lists = data.body[0].lists
@@ -138,41 +147,54 @@ app.get("/", isLoggedIn, (req, res) => {
   })
 })
 
+// New list
 app.post("/", (req, res) => {
+  // Make random URL
   let url = randomUrl()
 
   let userMail = req.user.email
 
+  // Get all lists from logged in user
   getUrlArray(userMail).then(data => {
     let lists = data.body[0].lists
-    lists.push(url)
 
+    // Add new list to array
+    lists.push(url)
     return lists
   }).then ( lists => {
+    // Send updated list array to profile database table
     addUrlToUser(userMail, lists)
   })  
 
+  // Redirect user to new list
   res.redirect(`/${url}`)
 })
 
+// Log user out and redirect to login page
 app.get("/logout", (req, res) => {
   req.logout();
   req.session.destroy();
   res.redirect('/')
 })
 
+// List route
 app.get('/:id', isLoggedIn, (req,res) => {
   let url = req.params.id
   let photoURL = req.user.photos[0].value
 
+  // Add list to list database table
   let insert = { "url": url, "email": req.user.email }
   addList(insert)
 
+  // Get items from list 
   getItems(url).then(data => {
     let items
+    
+    // If there are items, fill variable with those items
     if (data.body[0] != undefined) {
       items = data.body[0].list_items
     } else {
+      // If there are no items, set empty array
       items = []
     }
     res.render("list", {user: req.user, photo: photoURL, url, items})
@@ -182,11 +204,11 @@ app.get('/:id', isLoggedIn, (req,res) => {
 
 
 
-
+// Authenticate route for Google
 app.get("/auth/google", 
   passport.authenticate('google', { scope: ['email', 'profile']})
 )
-
+// Authenticate route back for Google
 app.get("/google/callback", 
   passport.authenticate('google', {
     successRedirect: '/',
@@ -194,36 +216,41 @@ app.get("/google/callback",
   })
 )
 
+// Authenticate failure route for Google
 app.get("/auth/failure", (req, res) => {
   res.send('Something went wrong')
 })
 
+// Server
 http.listen(port, () => {
   console.log('listening on port ', port)
 })
 
 
 
-
+// Add list to database list table
 async function addList (insert) {
   const { data, error } = await supabase
     .from('lists')
     .insert([ insert,])
 }
 
+// Generate random URL hash
 function randomUrl() {
   let urlHash = Math.random().toString(36).substring(7);
   return urlHash
 }
 
+// Add user to database profiles table
 async function addUserDB (userMail) {
-  const { data, error } = await supabase
+  let addUserDB = await supabase
     .from('profiles')
     .insert([
       { email:  userMail},
     ])
 }
 
+// Get all lists of user from database profiles table
 async function getUrlArray(userMail) {
   let array = await supabase
     .from('profiles')
@@ -233,6 +260,7 @@ async function getUrlArray(userMail) {
   return array
 }
 
+// Add url to profile of user in database profiles table
 async function addUrlToUser(userMail, data) {
   let addUrlToUser = await supabase
     .from('profiles')
@@ -240,6 +268,7 @@ async function addUrlToUser(userMail, data) {
     .eq('email', userMail)
 }
 
+// Get list items from specific list/url
 async function getItems(url) {
   let array = await supabase
     .from('lists')
@@ -249,13 +278,15 @@ async function getItems(url) {
   return array
 }
 
+// Update item in specific list/url
 async function updateItem (url, insert) {
-  const { data, error } = await supabase
+  let updateItem = await supabase
     .from('lists')
     .update({ list_items: insert })
     .eq('url', url)
 }
 
+// Filter certain item from specific list/url
 function filterItem(list, item){
   let selectedItem = list.find(listItem => {
     return listItem.naam === item.value
