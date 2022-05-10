@@ -4,6 +4,8 @@
   - [Live demo](#live-demo)
   - [Beschrijving](#Beschrijving)
   - [Installatie](#Installatie)
+  - [Functies](#Functies)
+  - [Sockets](#Sockets)
   - [Supabase API (database)](#Supabase-API-(database))
   - [Data flow diagram](#Data-flow-diagram)
   - [To-do](#To-do)
