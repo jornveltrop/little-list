@@ -4,8 +4,8 @@
 
         {{#each lists}}
             <li>
-                <a href="/{{this}}">
-                    <h3>{{this}}</h3>
+                <a href="/{{this.url}}">
+                    <h3>{{#ifCond this.naam null}} {{this.url}} {{else}} {{this.naam}} {{/ifCond}}</h3>
                 </a>
             </li>
         {{/each}}

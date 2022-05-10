@@ -1,11 +1,24 @@
 <main>
-    <h2> Lijst '{{url}}'</h2>
+    <header class="title">
+        <div {{#ifCond nameList null}} class="none" {{/ifCond}}>
+            <h2>{{nameList}}</h2>
+            <button class="editListName"><img src="/images/edit.svg"></button>
+        </div>
+        <form {{#ifCond nameList null}} {{else}} class="none" {{/ifCond}} action="/{{url}}" method="post">
+            <input id="title" name="title" type="text" autocomplete="off" placeholder="List title">
+        </form>
+        
+    </header>
+    
     <form class="addItemForm">
         <fieldset>
             {{#each items}}
                 <li>
-                    <input id="{{naam}}" type="checkbox" {{#ifCond checked true}} checked {{/ifCond}}>
-                    <label for="{{naam}}" data-content="{{naam}}">{{naam}}</label>
+                    <div>
+                        <input id="{{naam}}" type="checkbox" {{#ifCond checked true}} checked {{/ifCond}}>
+                        <label for="{{naam}}" data-content="{{naam}}">{{naam}}</label>
+                    </div>
+                    <a item="{{naam}}"><img src="/images/trash.svg" alt=""></a>
                 </li>
             {{/each}}
             
@@ -15,4 +28,10 @@
             </section>
         </fieldset>
     </form>
+
+    <nav class="share">
+        <h3>Copy & share your list {{#ifCond nameList null}} {{else}} '{{nameList}}' {{/ifCond}}:</h3>
+        <h4 class="copyHidden">Copied</h4>
+        <span><input value="little-list-jorn.herokuapp.com/{{url}}"></input><img src="/images/copy.svg"></span>
+    </nav>
 </main>

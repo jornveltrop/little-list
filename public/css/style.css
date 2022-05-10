@@ -49,7 +49,7 @@ fieldset {
   flex-direction: column;
   width: 100%;
   max-width: 300px;
-  margin: 1em 0;
+  margin: 0 0 1em 0;
   gap: .5em;
 }
 
@@ -60,6 +60,22 @@ li {
   margin: 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+li div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+li a {
+  display: flex;
+  justify-content: center;
+}
+
+li a img {
+  height: 1em;
 }
 
 h1 {
@@ -71,22 +87,110 @@ h1 {
 
 h2 {
   text-align: center;
+  margin: .4em;
 }
 
-header {
+
+nav h3 {
+  margin-bottom: .3em;
+}
+
+h4 {
+  margin: 0 0 .1em 0;
+  font-weight: 300;
+  font-style: italic;
+}
+
+body > header {
   padding: 1em 1em .5em 1em;
   display: flex;
   justify-content: space-between
 }
 
-header a {
+body > header a {
   text-decoration: none;
 }
 
-header img {
+body > header img {
   border-radius: 100%;
   height: 2.5em;
 }
+
+button {
+  appearance: none;
+  background: transparent;
+  color: var(--light);
+  font-family: 'Okta Neue', sans-serif;
+  font-size: 1.2em;
+  font-weight: 500;
+  border: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+a {
+  cursor: pointer;
+}
+
+.share {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--darkerGrey);
+  min-height: 7em;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 2em 2em 0 0;
+  padding-bottom: 2em;
+}
+
+.share span {
+  background: var(--light);
+  color: var(--dark);
+  width: fit-content;
+  border-radius: 1.1em;
+  padding: 1em 1.3em;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
+.share input {
+  margin: 0;
+  min-width: 270px;
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 1em;
+  font-family: 'Okta Neue', sans-serif;
+  padding: .2em;
+  -webkit-appearance: none;
+}
+
+.share span img {
+  height: 1em;
+}
+
+.title > div {
+  display: flex;
+  justify-content: center;
+}
+
+.title > div img {
+  height: 1em;
+}
+
+.title form {
+  margin-bottom: 1em;
+}
+
+.title input {
+  text-align: center;
+}
+
 
 .listView {
   display: flex;
@@ -123,16 +227,7 @@ header img {
   align-items: center;
 }
 
-button {
-  appearance: none;
-  background: transparent;
-  color: var(--light);
-  font-family: 'Okta Neue', sans-serif;
-  font-size: 1.2em;
-  font-weight: 500;
-  border: none;
-  -webkit-appearance: none;
-  cursor: pointer;
+.makeList button {
   min-height: 120px;
   width: 100%;
 }
@@ -221,4 +316,38 @@ label::before {
 
 section label {
   padding: .35em;
+}
+
+.none, .title > .none {
+  display: none;
+}
+
+.copyHidden {
+  opacity: 0;
+  transition: 3s ease-in-out;
+}
+
+.copyAnimatie {
+  opacity: 1;
+  transition: .3s ease-in-out;
+}
+
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1em;
+}
+
+.login a {
+  background: var(--darkGrey);
+  padding: .87em 1.3em;
+  display: flex;
+  gap: .6em;
+  border-radius: .7em;
+  text-decoration: none;
+}
+
+.login img {
+  height: 1.5em;
 }

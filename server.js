@@ -35,7 +35,9 @@ app.use(session({
 }))
 
 // Parse incoming requests.
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({
+  extended: true
+}));
 
 // Set-up passport
 app.use(passport.initialize());
@@ -128,7 +130,22 @@ io.on('connection', (socket) => {
     })
   })
 
+  socket.on("removeItem", (item) => {
+    console.log(item.value + " is clicked to remove (server-side).")
 
+    io.to(item.room).emit("removeItem", item.value)
+
+    let url = item.room
+    getItems(url).then(data => {
+      let items = data.body[0].list_items
+
+      let filteredItem = items.filter( i => { return i.naam !== item.value })
+
+      return filteredItem
+    }).then(filteredItem => {
+      updateItem(url, filteredItem)
+    })
+  })
 })
 
 // ROUTES
@@ -156,10 +173,16 @@ app.post("/", (req, res) => {
 
   // Get all lists from logged in user
   getUrlArray(userMail).then(data => {
-    let lists = data.body[0].lists
+    let lists = data.body[0].lists || []
 
+    // Make new item
+    let newList = {
+      "url": url,
+      "naam": null
+    }
     // Add new list to array
-    lists.push(url)
+    lists.push(newList)
+
     return lists
   }).then ( lists => {
     // Send updated list array to profile database table
@@ -186,6 +209,8 @@ app.get('/:id', isLoggedIn, (req,res) => {
   let insert = { "url": url, "email": req.user.email }
   addList(insert)
 
+  
+
   // Get items from list 
   getItems(url).then(data => {
     let items
@@ -197,12 +222,46 @@ app.get('/:id', isLoggedIn, (req,res) => {
       // If there are no items, set empty array
       items = []
     }
-    res.render("list", {user: req.user, photo: photoURL, url, items})
+
+    getNameList(url).then(data => {
+      let nameList = data.body[0].naam
+      console.log(nameList)
+      res.render("list", {user: req.user, photo: photoURL, url, items, nameList})
+    })
   })
 
 });
 
+app.post("/:id", (req, res) => {
+  let url = req.params.id
+  let title = req.body.title;
 
+  updateNameList(url, title)
+
+  let userMail = req.user.email
+
+  getUrlArray(userMail).then(data => {
+    let lists = data.body[0].lists
+
+    console.log(lists)
+
+    // Get specific changed item from database data
+    let filteredItem = filterList(lists, url) 
+    console.log(filteredItem)
+    
+    // Change checked state to false
+    filteredItem.naam = title
+
+    console.log(lists)
+    return lists
+  }).then(lists => {
+    // Send changed list back to database
+    updateUrlArray(userMail, lists)
+  })
+
+  // Redirect user to new list
+  res.redirect(`/${url}`)
+})
 
 // Authenticate route for Google
 app.get("/auth/google", 
@@ -260,6 +319,13 @@ async function getUrlArray(userMail) {
   return array
 }
 
+async function updateUrlArray (userMail, insert) {
+  let updateItem = await supabase
+    .from('profiles')
+    .update({ lists: insert })
+    .eq('email', userMail)
+}
+
 // Add url to profile of user in database profiles table
 async function addUrlToUser(userMail, data) {
   let addUrlToUser = await supabase
@@ -278,6 +344,18 @@ async function getItems(url) {
   return array
 }
 
+
+// Get list items from specific list/url
+async function getNameList(url) {
+  let naam = await supabase
+    .from('lists')
+    .select('naam')
+    .eq('url', url)
+
+  return naam
+}
+
+
 // Update item in specific list/url
 async function updateItem (url, insert) {
   let updateItem = await supabase
@@ -286,10 +364,27 @@ async function updateItem (url, insert) {
     .eq('url', url)
 }
 
+// Update name of list
+async function updateNameList (url, insert) {
+  let updateNameList = await supabase
+    .from('lists')
+    .update({ 'naam': insert })
+    .eq('url', url)
+}
+
 // Filter certain item from specific list/url
 function filterItem(list, item){
   let selectedItem = list.find(listItem => {
     return listItem.naam === item.value
+  })
+
+  return selectedItem
+}
+
+
+function filterList(lists, list){
+  let selectedItem = lists.find(listItem => {
+    return listItem.url === list
   })
 
   return selectedItem
