@@ -34,10 +34,6 @@ function setEventListeners() {
 setEventListeners();
 
 //client side code:
-socket.on('roomSize', (roomSize) => {
-  console.log(roomSize)
-});
-
 socket.on('item', item => {
   console.log(item)
   let html = document.createElement('li')

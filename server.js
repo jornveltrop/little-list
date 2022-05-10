@@ -77,7 +77,6 @@ io.on('connection', (socket) => {
     .then(items => {
       updateItem(url, items)
     })
-
   })
 
   socket.on('disconnect', () => {
