@@ -91,7 +91,7 @@ io.on('connection', (socket) => {
     // Get current room items from database
     let url = item.room
     getItems(url).then(data => {
-      let items = data.body[0].list_items
+      let items = data.body[0].list_items || []
 
       // Get specific changed item from database data
       let filteredItem = filterItem(items, item) 
@@ -115,7 +115,7 @@ io.on('connection', (socket) => {
     // Get current room items from database
     let url = item.room
     getItems(url).then(data => {
-      let items = data.body[0].list_items
+      let items = data.body[0].list_items || []
 
       // Get specific changed item from database data
       let filteredItem = filterItem(items, item) 
@@ -137,7 +137,7 @@ io.on('connection', (socket) => {
 
     let url = item.room
     getItems(url).then(data => {
-      let items = data.body[0].list_items
+      let items = data.body[0].list_items || []
 
       let filteredItem = items.filter( i => { return i.naam !== item.value })
 
@@ -158,7 +158,7 @@ app.get("/", isLoggedIn, (req, res) => {
   // Get all lists from logged in user
   getUrlArray(userMail).then(data => {
 
-    let lists = data.body[0].lists
+    let lists = data.body[0].lists || []
 
     res.render("dashboard", {user: req.user, photo: photoURL, lists})
   })
@@ -241,7 +241,7 @@ app.post("/:id", (req, res) => {
   let userMail = req.user.email
 
   getUrlArray(userMail).then(data => {
-    let lists = data.body[0].lists
+    let lists = data.body[0].lists || []
 
     console.log(lists)
 
