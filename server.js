@@ -133,16 +133,20 @@ io.on('connection', (socket) => {
   socket.on("removeItem", (item) => {
     console.log(item.value + " is clicked to remove (server-side).")
 
+    // Send removed item to all clients in specific room
     io.to(item.room).emit("removeItem", item.value)
 
+    // Get current room items from database
     let url = item.room
     getItems(url).then(data => {
       let items = data.body[0].list_items || []
 
+      // Get specific changed item from database data
       let filteredItem = items.filter( i => { return i.naam !== item.value })
 
       return filteredItem
     }).then(filteredItem => {
+      // Send changed list back to database
       updateItem(url, filteredItem)
     })
   })
@@ -209,8 +213,6 @@ app.get('/:id', isLoggedIn, (req,res) => {
   let insert = { "url": url, "email": req.user.email }
   addList(insert)
 
-  
-
   // Get items from list 
   getItems(url).then(data => {
     let items
@@ -223,9 +225,10 @@ app.get('/:id', isLoggedIn, (req,res) => {
       items = []
     }
 
+    // Get the name of list
     getNameList(url).then(data => {
       let nameList = data.body[0].naam
-      console.log(nameList)
+
       res.render("list", {user: req.user, photo: photoURL, url, items, nameList})
     })
   })
@@ -236,23 +239,21 @@ app.post("/:id", (req, res) => {
   let url = req.params.id
   let title = req.body.title;
 
+  // Send updated title to database
   updateNameList(url, title)
 
   let userMail = req.user.email
 
+  // Get all lists from logged in user
   getUrlArray(userMail).then(data => {
     let lists = data.body[0].lists || []
 
-    console.log(lists)
-
     // Get specific changed item from database data
     let filteredItem = filterList(lists, url) 
-    console.log(filteredItem)
     
     // Change checked state to false
     filteredItem.naam = title
 
-    console.log(lists)
     return lists
   }).then(lists => {
     // Send changed list back to database
@@ -319,6 +320,7 @@ async function getUrlArray(userMail) {
   return array
 }
 
+//Update list array of user
 async function updateUrlArray (userMail, insert) {
   let updateItem = await supabase
     .from('profiles')
@@ -344,7 +346,6 @@ async function getItems(url) {
   return array
 }
 
-
 // Get list items from specific list/url
 async function getNameList(url) {
   let naam = await supabase
@@ -354,7 +355,6 @@ async function getNameList(url) {
 
   return naam
 }
-
 
 // Update item in specific list/url
 async function updateItem (url, insert) {
@@ -381,7 +381,7 @@ function filterItem(list, item){
   return selectedItem
 }
 
-
+// Get specific item from list
 function filterList(lists, list){
   let selectedItem = lists.find(listItem => {
     return listItem.url === list

@@ -21,19 +21,22 @@ if (document.querySelector('.addItemForm')) {
   })
 } 
 
-// Add event listeners to items for checked/unchecked
+// Add event listeners to items for checked/unchecked & edit/remove buttons
 function setEventListeners() {
   let inputs = document.querySelectorAll('input[type="checkbox"]')
   let editListNameButton = document.querySelector('.editListName')
   let trashCans = document.querySelectorAll('.addItemForm li a')
+  let shareSpace = document.querySelector('.share span')
 
-  if(editListNameButton) {
+  if (editListNameButton) {
     editListNameButton.addEventListener("click", editListName)
   }
 
   trashCans.forEach(trash => {
       trash.addEventListener("click", removeItem)
   });
+
+  shareSpace.addEventListener("click", copyClipboard)
 
   inputs.forEach(input => {
     input.addEventListener("change", _event => {
@@ -51,12 +54,14 @@ function setEventListeners() {
 
 setEventListeners();
 
+// Send removed item to server
 function removeItem() {
   let value = this.getAttribute('item')
   let item = {value: value, room: room}
   socket.emit("removeItem", item)
 }
 
+// Change list name
 function editListName() {
   let listNameForm = document.querySelector('.title > form')
   let listName = document.querySelector('.title > div')
@@ -67,6 +72,30 @@ function editListName() {
   listNameForm.classList.remove('none')
   listName.classList.add('none')
 }
+
+// Copy to clipboard
+function copyClipboard() {
+  let share = document.querySelector('.share input')
+
+  share.select();
+  navigator.clipboard.writeText(share.value);
+
+  setAnimatieCopy()
+  setTimeout(removeAnimatieCopy, 1000);
+}
+
+// Set animation for copy
+function setAnimatieCopy() {
+  let copyH4 = document.querySelector('.share h4')
+  copyH4.classList.add('copyAnimatie')
+}
+
+// Remove animation for copy
+function removeAnimatieCopy() {
+  let copyH4 = document.querySelector('.share h4')
+  copyH4.classList.remove('copyAnimatie')
+}
+
 
 // When server sends item
 socket.on('item', item => {
@@ -141,6 +170,7 @@ socket.on("unchecked", item => {
   }
 })
 
+// If server sends removed item, remove item
 socket.on("removeItem", item => {
   console.log(item + " is clicked to remove (client-side).")
   let removeItem = document.querySelector(`#${item}`)
@@ -148,28 +178,4 @@ socket.on("removeItem", item => {
   let parent = removeItem.parentElement
   parent.parentElement.remove()
 })
-
-
-let shareSpace = document.querySelector('.share span')
-let share = document.querySelector('.share input')
-
-shareSpace.addEventListener("click", copyClipboard)
-
-function copyClipboard() {
-  share.select();
-  navigator.clipboard.writeText(share.value);
-
-  setAnimatieCopy()
-  setTimeout(removeAnimatieCopy, 1000);
-}
-
-function setAnimatieCopy() {
-  let copyH4 = document.querySelector('.share h4')
-  copyH4.classList.add('copyAnimatie')
-}
-
-function removeAnimatieCopy() {
-  let copyH4 = document.querySelector('.share h4')
-  copyH4.classList.remove('copyAnimatie')
-}
 
