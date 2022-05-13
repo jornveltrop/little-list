@@ -19,7 +19,7 @@
 ## Beschrijving
 Little List is een real-time checklist applicatie. Met Little List kun je lijstjes maken die instant updaten, door de constante verbinding met de server. Super handig, als je vader al in de supermarkt staat en je zet nog nét even de pindakaas op het lijstje. Deze verschijnt meteen bij paps op zijn mobiel. 
 
-<img src="docs/interface.png" width="50%" alt="Een screenshot van de interface van Little List ">
+<img src="docs/interface1.png" width="50%" alt="Een screenshot van de interface van Little List ">
 
 ## Installatie
 Clone deze repository naar jouw lokale folder:
