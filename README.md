@@ -48,6 +48,7 @@ Ik heb voor deze applicatie gebruik gemaakt van de [socket.io](https://socket.io
 Om de gegevens van de mensen op te slaan maak ik gebruik van [Supabase](https://supabase.com/). Supabase is een open source database en API systeem. Hierin heb ik een eigen database model opgezet. Deze database vul ik via de server met API calls. 
 
 Dit is het data model wat gebruikt wordt in de database voor Little List:
+
 <a href="docs/data-modellen.png"  target="_blank">
 	<img src="docs/data-modellen.png" width="60%" alt="Een visueel overzicht van het data model voor de database in Supabase">
 </a>
